@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { linksApi } from '../services/api';
 import { ShortLink } from '../types';
-import { X, Link2, Zap } from 'lucide-react';
+import { X, Link2, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Props {
   onClose: () => void;
@@ -9,7 +9,13 @@ interface Props {
 }
 
 export default function CreateLinkModal({ onClose, onCreated }: Props) {
-  const [form, setForm] = useState({ original_url: '', title: '' });
+  const [form, setForm] = useState({
+    original_url: '',
+    title: '',
+    custom_code: '',
+    expires_at: '',
+  });
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +24,13 @@ export default function CreateLinkModal({ onClose, onCreated }: Props) {
     setError('');
     setLoading(true);
     try {
-      const { data } = await linksApi.create(form);
+      const payload: Parameters<typeof linksApi.create>[0] = {
+        original_url: form.original_url,
+        title: form.title || undefined,
+        custom_code: form.custom_code || undefined,
+        expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
+      };
+      const { data } = await linksApi.create(payload);
       onCreated(data);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: Record<string, string[]> } };
@@ -82,6 +94,54 @@ export default function CreateLinkModal({ onClose, onCreated }: Props) {
               maxLength={255}
             />
           </div>
+
+          {/* Advanced options */}
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors"
+          >
+            {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            Advanced options
+          </button>
+
+          {showAdvanced && (
+            <div className="space-y-4 pt-1">
+              <div>
+                <label className="label">
+                  Custom short code <span className="text-white/30">(optional)</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="text-white/30 text-sm mr-2 shrink-0">ls.io/</span>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="my-link"
+                    value={form.custom_code}
+                    onChange={(e) => setForm({ ...form, custom_code: e.target.value })}
+                    maxLength={50}
+                    pattern="[a-zA-Z0-9_-]*"
+                    title="Letters, numbers, hyphens and underscores only"
+                  />
+                </div>
+                <p className="text-white/25 text-xs mt-1">Letters, numbers, hyphens and underscores only.</p>
+              </div>
+              <div>
+                <label className="label">
+                  Expiration <span className="text-white/30">(optional)</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  className="input-field"
+                  value={form.expires_at}
+                  onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+                <p className="text-white/25 text-xs mt-1">Link will stop working after this date.</p>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">
               Cancel

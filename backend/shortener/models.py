@@ -12,10 +12,11 @@ def generate_short_code():
 class ShortLink(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='links')
     original_url = models.URLField(max_length=2048)
-    short_code = models.CharField(max_length=10, unique=True, default=generate_short_code)
+    short_code = models.CharField(max_length=50, unique=True, default=generate_short_code)
     title = models.CharField(max_length=255, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -26,6 +27,11 @@ class ShortLink(models.Model):
     @property
     def click_count(self):
         return self.clicks.count()
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.expires_at is not None and self.expires_at < timezone.now()
 
 
 class Click(models.Model):

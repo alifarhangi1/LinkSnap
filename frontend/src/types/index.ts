@@ -13,12 +13,17 @@ export interface ShortLink {
   title: string;
   created_at: string;
   is_active: boolean;
+  expires_at: string | null;
+  is_expired: boolean;
   click_count: number;
   short_url: string;
 }
 
 export interface ShortLinkDetail extends ShortLink {
   clicks_by_day: { date: string; count: number }[];
+  device_breakdown: { device: string; count: number }[];
+  browser_breakdown: { browser: string; count: number }[];
+  top_referrers: { referrer: string; count: number }[];
 }
 
 export interface DashboardStats {

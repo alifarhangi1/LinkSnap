@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Zap, LogOut, LayoutDashboard } from 'lucide-react';
+import { Zap, LogOut, LayoutDashboard, Settings } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -26,13 +26,17 @@ export default function Navbar() {
             <>
               <Link to="/dashboard" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
                 <LayoutDashboard size={16} />
-                <span className="text-sm font-medium">Dashboard</span>
+                <span className="text-sm font-medium hidden sm:inline">Dashboard</span>
               </Link>
-              <span className="text-white/30">|</span>
-              <span className="text-sm text-white/50">{user.username}</span>
+              <Link to="/settings" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+                <Settings size={16} />
+                <span className="text-sm font-medium hidden sm:inline">Settings</span>
+              </Link>
+              <span className="text-white/30 hidden sm:inline">|</span>
+              <span className="text-sm text-white/50 hidden sm:inline">{user.username}</span>
               <button onClick={handleLogout} className="flex items-center gap-2 btn-secondary text-sm py-2 px-4">
                 <LogOut size={14} />
-                Logout
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </>
           ) : (

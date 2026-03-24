@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShortLink } from '../types';
 import { linksApi } from '../services/api';
-import { Copy, Trash2, BarChart3, ExternalLink, ToggleLeft, ToggleRight, Check } from 'lucide-react';
+import { Copy, Trash2, BarChart3, ExternalLink, ToggleLeft, ToggleRight, Check, Clock, AlertCircle } from 'lucide-react';
 
 interface Props {
   link: ShortLink;
@@ -47,8 +47,29 @@ export default function LinkCard({ link, onDeleted, onToggled }: Props) {
 
   const shortCode = link.short_url.split('/').pop();
 
+  const expirationBadge = (() => {
+    if (!link.expires_at) return null;
+    if (link.is_expired) {
+      return (
+        <span className="flex items-center gap-1 text-xs bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">
+          <AlertCircle size={10} />
+          Expired
+        </span>
+      );
+    }
+    const expiresDate = new Date(link.expires_at).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+    });
+    return (
+      <span className="flex items-center gap-1 text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full">
+        <Clock size={10} />
+        Expires {expiresDate}
+      </span>
+    );
+  })();
+
   return (
-    <div className={`glass-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-200 ${!link.is_active ? 'opacity-60' : ''}`}>
+    <div className={`glass-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all duration-200 ${!link.is_active || link.is_expired ? 'opacity-60' : ''}`}>
       {/* Icon + URL info */}
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="w-10 h-10 rounded-xl bg-brand-500/15 flex items-center justify-center shrink-0">
@@ -57,13 +78,14 @@ export default function LinkCard({ link, onDeleted, onToggled }: Props) {
           </span>
         </div>
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
             <span className="text-brand-400 font-mono font-semibold text-sm">
               ls.io/{shortCode}
             </span>
             {!link.is_active && (
               <span className="text-xs bg-white/10 text-white/40 px-2 py-0.5 rounded-full">Inactive</span>
             )}
+            {expirationBadge}
           </div>
           {link.title && (
             <div className="text-white font-medium text-sm truncate">{link.title}</div>

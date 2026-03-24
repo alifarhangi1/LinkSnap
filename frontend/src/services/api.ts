@@ -51,14 +51,18 @@ export const authApi = {
     last_name?: string;
   }) => api.post('/auth/register/', data),
   me: () => api.get('/auth/me/'),
+  updateProfile: (data: { first_name?: string; last_name?: string; email?: string }) =>
+    api.patch('/auth/me/', data),
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    api.post('/auth/change-password/', data),
 };
 
 export const linksApi = {
   list: () => api.get('/links/'),
-  create: (data: { original_url: string; title?: string }) =>
+  create: (data: { original_url: string; title?: string; custom_code?: string; expires_at?: string | null }) =>
     api.post('/links/', data),
   get: (id: number) => api.get(`/links/${id}/`),
-  update: (id: number, data: Partial<{ title: string; is_active: boolean }>) =>
+  update: (id: number, data: Partial<{ title: string; is_active: boolean; expires_at: string | null }>) =>
     api.patch(`/links/${id}/`, data),
   delete: (id: number) => api.delete(`/links/${id}/`),
 };
